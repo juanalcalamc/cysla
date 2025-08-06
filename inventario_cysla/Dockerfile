@@ -1,34 +1,16 @@
-FROM python:3.12-alpine
+# Usa una imagen oficial de Python
+FROM python:3.12
 
-# Evita archivos .pyc y habilita logs en consola
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-
-# Establece directorio de trabajo
+# Establece el directorio de trabajo
 WORKDIR /app
 
-# Instala dependencias del sistema necesarias
-RUN apk update && apk add --no-cache \
-    gcc \
-    musl-dev \
-    python3-dev \
-    libffi-dev \
-    mariadb-dev \
-    jpeg-dev \
-    zlib-dev \
-    build-base \
-    pkgconfig \
-    libjpeg \
-    && rm -rf /var/cache/apk/*
-
-# Copia e instala dependencias de Python
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copia el resto de la aplicación
+# Copia el contenido de tu proyecto
 COPY . .
 
-# Expone el puerto del servidor de Django
+# Instala dependencias
+RUN pip install --upgrade pip && pip install -r requirements.txt
+
+# Expone el puerto del contenedor
 EXPOSE 8000
 
 # Comando por defecto
