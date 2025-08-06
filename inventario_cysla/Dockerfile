@@ -1,32 +1,35 @@
-FROM python:3.12-slim
+FROM python:3.12-alpine
 
-# Variables de entorno para mejorar el comportamiento de Python
+# Evita archivos .pyc y habilita logs en consola
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Establecer el directorio de trabajo
+# Establece directorio de trabajo
 WORKDIR /app
 
-# Instalar solo lo necesario, sin extras recomendados (más rápido y liviano)
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Instala dependencias del sistema necesarias
+RUN apk update && apk add --no-cache \
     gcc \
+    musl-dev \
     python3-dev \
     libffi-dev \
-    default-libmysqlclient-dev \
-    libjpeg-dev \
-    zlib1g-dev \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
+    mariadb-dev \
+    jpeg-dev \
+    zlib-dev \
+    build-base \
+    pkgconfig \
+    libjpeg \
+    && rm -rf /var/cache/apk/*
 
-# Copiar e instalar dependencias de Python
+# Copia e instala dependencias de Python
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiar el resto del código
+# Copia el resto de la aplicación
 COPY . .
 
-# Exponer el puerto 8000 (Django default)
+# Expone el puerto del servidor de Django
 EXPOSE 8000
 
-# Comando de inicio
+# Comando por defecto
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
